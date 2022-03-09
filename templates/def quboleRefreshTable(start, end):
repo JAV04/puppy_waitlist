@@ -1,0 +1,14 @@
+def quboleClusterInstanceDetails(start, end):
+    quboleKey = os.getenv("X_AUTH_TOKEN")
+    quboleURL = "https://us.qubole.com/api/v1.2/reports/cluster_usage?start_date={}&end_date={}".format(start, end)
+    print(quboleKey)
+    headers = {
+        "X-AUTH-TOKEN":quboleKey,
+        "Content-Type":"application/json",
+        "Accept":"application/json",
+    }
+    a = requests.get(quboleURL, headers=headers)
+    parsed = json.loads(a.content)
+    print(json.dumps(parsed, indent=4, sort_keys=True))
+
+

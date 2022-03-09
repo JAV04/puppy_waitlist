@@ -1,0 +1,207 @@
+{% extends "base.html" %} 
+{% block content %}
+{% load puppy_template_tags %}
+
+<style>
+.card-deck{
+    margin-top: 5%;
+    margin-bottom: 5%;
+    margin-left: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-gap: 5%;
+}
+
+
+.card:hover, .card:focus {
+        transform: scale(1.04);
+        transition-timing-function: ease-in-out;
+
+    }
+
+.fixed-element {
+    position:fixed; 
+    top:  0px; 
+    left: 0px; 
+    width: 100%;
+    z-index:9999; 
+    border-radius:0px
+}
+
+</style>
+
+<div id="puppybox" class ="container">
+<br>
+    <div id="message-box">
+    {% if messages %}
+            {% for message in messages %}
+                    <div id="popup-message-content" class="custom-message fixed-element alert-from-load animate__animated animate__bounceInLeft alert alert-{{ message.tags }}">
+            <strong>{{ message }} </strong>
+            </div>
+            {% endfor %}
+    {% endif %}
+    </div>
+    
+    <hr/>
+
+    <h2> Please Note:</h2>
+
+    <ul>
+    <li><strong>Clicking "I'm Interested" below does NOT guarantee you a puppy from that litter. Our average wait time is 6-9 months.</strong></li>
+    <li>Payment/selection pins will be sent out in order by date registered for this site. Those who registered first are at the front of the line. </li>
+    <li>You can only select you are interested in ONE litter at a time. Choose wisely!</li>
+    <li>Only let us know you are interested if you do hope to purchase a puppy from the litter. This helps us better understand our demand for future planning.</li>
+    </ul>
+    <hr/>
+
+    
+
+    {% if user|on_closed_list %}
+
+        <br> 
+        <hr>
+
+        <h3 class="text-center"> You are on a closed list for {{ user|get_closed_list }}'s Litter! Your "note of interest" is locked in until the selection process is complete. You will only be able to view other litters if you do not recieve a puppy from {{ user|get_closed_list }}'s litter on selection day. Please be patient!
+
+    
+    {% else %}
+        
+
+    <div class="card-deck">
+        {% for litter in litter_list %}
+        {% if litter.size == user.desired_size or user.desired_size == "any" %}
+        <div id="{{ litter.id }}-card" class="card text-center animate__animated animate__zoomInDown">
+          <div class="card-header text-white bg-primary mb-3">
+            <strong>{{ litter.mother_name }}'s Litter <small>{{ litter|get_litter_size }}</small></strong>
+          </div>
+          <div class="card-body mx-auto">
+            <p class="card-text"><small class = "mx-auto"> Puppies Available: {{ litter.available_count }}</small>
+                                <small class = "mx-auto">Males: {{ litter.male_count }} | Females: {{ litter.female_count }}</small>
+                                <small class = "mx-auto">{{ litter|get_allergy_friendly }} </small>
+                                <br>
+                                <small class = "mx-auto">Birthday: {{ litter.birth_date }}</small>
+                                <small class = "mx-auto">Selection: {{ litter.selection_date }} </small>
+                                <small class = "mx-auto">Take Home: {{ litter.takehome_startdate }} - {{ litter.takehome_enddate }} </small></p>
+                                <hr>
+                            </p>
+            <p class="card-text">{{litter.breeder_notes|slice:":500" }}</p>
+            
+
+          </div>
+          <div class="card-footer">
+                <small id="{{ litter.id }}-like-count"             class = "mx-auto text-muted">Customers interested: {{ litter|get_total_likes }}</small>
+                <hr>
+                <small id="{{ litter.id }}-perc-interested-male"   class = "mx-auto text-muted">% male preference: {{ litter|get_perc_likes_male }}</small>
+                <small id="{{ litter.id }}-perc-interested-female" class = "mx-auto text-muted">% female preference: {{ litter|get_perc_likes_female }}</small>
+                <small id="{{ litter.id }}-perc-interested-either"   class = "mx-auto text-muted">% either gender preference: {{ litter|get_perc_likes_either }}</small>
+                <hr>
+                {% if litter|has_user_liked:user %}
+                <input id="{{ litter.id }}-like" type="button" class="like btn btn-primary" name="{{ litter.id }}" value="I'm Interested" />
+                {% else %}
+                <input id="{{ litter.id }}-like" type="button" class="like btn btn-secondary" name="{{ litter.id }}" value="I'm Interested" />
+                {% endif %}
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+    </div>
+    {% endif %}
+
+</div>
+
+    <script>
+    var m = document.getElementsByClassName("alert-from-load");  // Return an array
+
+    setTimeout(function(){
+       if (m && m.length) {
+           m[0].classList.add('animate__bounceOutLeft');
+       }
+    }, 3000);
+</script>
+
+<script>
+
+$(window).ready(function() {
+    $(".fixed-element").css("top",Math.max(0,75-$(this).scrollTop()));
+});
+
+$(window).scroll(function(){
+    $(".fixed-element").css("top",Math.max(0,75-$(this).scrollTop()));
+});
+
+$('.like').click(function(e){
+    e.preventDefault();
+
+      $.ajax({
+               type: "POST",
+               url: "{% url 'ajaxlike' %}",
+               data: {'litter_id': $(this).attr('name'), 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+               dataType: "json",
+               success: function(response) {
+
+                $('.like').removeClass('btn-primary').addClass('btn-secondary')
+                $.each(response.likes, function(i, litter) {
+                    if (litter.is_liked == 'True') {
+                        
+                        $('#' + litter.id + '-like').removeClass("btn-secondary").addClass('btn-primary');
+                }
+                        $('#' + litter.id + '-like-count').text("Customer's Interested: " + litter.liked_count);
+                        $('#' + litter.id + '-perc-interested-male').text("% male preference: " + litter.perc_male);
+                        $('#' + litter.id + '-perc-interested-female').text("% female preference: " + litter.perc_female);
+                        $('#' + litter.id + '-perc-interested-either').text("% either preference: " + litter.perc_either);
+                });
+
+                update_messages(response.messages);
+
+          }, 
+                error: function(rs, e) {
+                       alert("Error! Reload home page", e);
+                }
+
+
+    })});
+
+function update_messages(messages){
+
+$(".custom-message").add('animate__bounceOutLeft');
+
+var unq_id = uniqueId()
+$.each(messages, function (i, m) {
+                $("#message-box").append("<div class='custom-message fixed-element " + unq_id + " animate__animated animate__bounceInLeft alert alert-"+m.level+"''><strong>"+m.message+"</strong></div>");
+            });
+$(".fixed-element").css("top", Math.max(0,75-$(this).scrollTop()));
+
+// Return an array
+var m = document.getElementsByClassName(unq_id);  
+setTimeout(function(){
+   if (m && m.length) {
+       m[0].classList.add('animate__bounceOutLeft');
+   }
+}, 3000);
+
+}
+
+
+
+
+function uniqueId() {
+  return Math.round(new Date().getTime() + (Math.random() * 100));
+}
+
+
+</script>
+
+
+
+{%endblock%}
+
+
+
+
+
+
+          
+
+
+

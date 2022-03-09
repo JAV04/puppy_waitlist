@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Peters' Puppies: Waitlist</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=PT+Sans&family=Yanone+Kaffeesatz&display=swap" rel="stylesheet">
+        <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+        <meta name="google" content="notranslate" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous" />
+        </head>
+
+        <style>
+
+        .me-md-auto {
+            margin-right: auto!important;
+        }
+
+        .shadow {
+            box-shadow: 0 4px 2px -2px rgba(0, 0, 0, 0.1);
+        }
+        .btn-danger {
+            color: #fff;
+            background-color: #f00000;
+            border-color: #dc281e;
+        }
+        .masthead {
+            background: #3398E1;
+            height: auto;
+            padding-bottom: 15px;
+            box-shadow: 0 16px 48px #E3E7EB;
+            padding-top: 10px;
+        }
+
+
+        
+        small {
+          display: block;
+        }
+
+
+        @media (min-width: 1000px) {
+
+              .outer {
+                    height: 100%; 
+                    overflow: auto;
+                }
+
+        }
+        
+
+        .alert {
+        positition: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0px);
+        transition: visibility 0s, opacity 250ms, transform 250ms;
+        }
+        .alert.hide {
+        positition: relative;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-10px); // translateX, translateY, translateZ works well
+        transition: visibility 0s 250ms, opacity 250ms, transform 250ms;
+        }
+
+        .nav-item:hover, .nav-item:focus {
+        transform: scale(1.05);
+        transition-timing-function: ease-in-out;
+
+    }
+  
+
+
+    </style>
+
+    <body>
+
+		<header class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-body border-bottom shadow-md">
+		  <a class="h4 text-center color-primary my-0 me-md-auto fw-normal"><strong>Peters' Puppies ::: </strong> Waitlist</a>
+		  
+		  {% if user.is_authenticated %}
+		  <nav>
+		        <a class="btn btn-outline-primary" href="{% url 'update' %}">Edit Profile</a>
+		        <a class="btn btn-outline-primary" href="{% url 'logout' %}">Logout</a>
+		  </nav>
+		  {% endif %}
+
+		  
+		</header>
+
+        <div class="outer">
+        {% block content %}
+        <!-- Content Goes here -->
+        {% endblock content %}
+        <!-- Footer -->
+        </div>
+        <br>
+        <hr>
+        <footer class="py-3 bg-grey">
+            <p class="m-0 text-dark text-center text-muted "><small>Copyright &copy;2021 JordanVoves</small></p>
+        </footer>
+    </body>
+
+
+</html>
